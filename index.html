@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Meme Stock Phenomenon: An Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed with a thematic, non-linear structure to maximize user understanding. It starts with a high-level "What is a Meme Stock?" definition, then flows into four core interactive sections accessible via a sticky navigation bar: 1) 'The Anatomy' (Characteristics), 2) 'The GameStop Saga' (Case Study), 3) 'Risk & Reward' (Investor Perspective), and 4) 'Market Impact' (Systemic Effects). This structure was chosen over mirroring the report's linear format to allow users to explore topics based on their interest. For example, a new investor might focus on 'Risk & Reward,' while someone familiar with the basics might jump to 'Market Impact.' The core interaction is section-based navigation, with internal interactive elements like a 'Short Squeeze' explainer and a dynamic chart comparing meme vs. traditional stock volatility to deepen engagement and clarify complex concepts. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Key characteristics of meme vs. traditional stocks. -> Goal: Compare. -> Viz/Presentation: Interactive dual-metric bar chart. -> Interaction: User can toggle between 'Volatility' and 'Volume Fluctuation' views. -> Justification: A dynamic chart is more engaging than a static table and visually emphasizes the extreme differences. -> Library/Method: Chart.js/Canvas.
+        - Report Info: The "Short Squeeze" mechanism. -> Goal: Organize/Explain Process. -> Viz/Presentation: A step-by-step interactive diagram built with HTML/CSS/Tailwind. -> Interaction: Users click "Next Step" to reveal each stage of the process with accompanying explanations. -> Justification: Breaks down a complex financial mechanism into simple, digestible steps, improving comprehension over a dense paragraph. -> Library/Method: HTML/CSS/JS.
+        - Report Info: Timeline of major meme stock events (GME, AMC). -> Goal: Show Change over time. -> Viz/Presentation: A clean, vertical timeline. -> Interaction: Hover effects on timeline points to provide more detail. -> Justification: A timeline is the most intuitive way to present chronological events and their significance. -> Library/Method: HTML/CSS/Tailwind.
+        - Report Info: Risks vs. Rewards for retail investors. -> Goal: Compare/Inform. -> Viz/Presentation: A side-by-side comparison layout using cards and icons. -> Interaction: Simple, static display for clarity. -> Justification: A clear, visual dichotomy helps users quickly grasp the high-stakes nature of meme stock trading. -> Library/Method: HTML/CSS/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #383838;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .nav-link.active {
+            color: #D97706;
+            border-bottom: 2px solid #D97706;
+        }
+        .nav-link:not(.active):hover {
+            color: #F59E0B;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 400px;
+        }
+        .step-explainer {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-amber-700 mb-2">The Meme Stock Phenomenon</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">An interactive guide to understanding the stocks driven by social media hype.</p>
+        </header>
+
+        <section id="intro" class="mb-16 bg-amber-50 p-8 rounded-2xl shadow-sm">
+            <h2 class="text-3xl font-bold mb-4 text-center text-amber-800">What Exactly is a Meme Stock?</h2>
+            <p class="text-center text-gray-700 max-w-4xl mx-auto leading-relaxed">
+                A meme stock is a company's stock that gains significant popularity among retail investors through social media platforms like Reddit, X, and TikTok. Its price skyrockets not because the company is performing well financially, but because of coordinated online hype and a compelling narrative—often a "David vs. Goliath" story of individual investors taking on large Wall Street firms. This activity is highly speculative and more akin to gambling than traditional investing, as the stock's value is completely disconnected from its real-world financial health.
+            </p>
+        </section>
+
+        <nav class="sticky top-0 bg-white/80 backdrop-blur-md z-10 shadow-md rounded-full mb-12 py-3 px-6">
+            <ul class="flex items-center justify-center space-x-4 md:space-x-8 text-sm md:text-base font-medium text-gray-600">
+                <li><a class="nav-link active pb-2" data-target="anatomy">The Anatomy</a></li>
+                <li><a class="nav-link pb-2" data-target="saga">The GameStop Saga</a></li>
+                <li><a class="nav-link pb-2" data-target="risk">Risk & Reward</a></li>
+                <li><a class="nav-link pb-2" data-target="impact">Market Impact</a></li>
+            </ul>
+        </nav>
+
+        <main id="main-content">
+            <div id="anatomy" class="content-section active">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-amber-800">The Anatomy of a Meme Stock</h2>
+                    <p class="mt-2 text-gray-600 max-w-2xl mx-auto">Meme stocks behave very differently from traditional stocks like Apple or Microsoft. Their value is driven by social sentiment, not business performance, leading to unique financial characteristics. This section breaks down those key differences.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                     <div class="flex justify-center mb-4 space-x-4">
+                        <button id="volatilityBtn" class="bg-amber-600 text-white px-4 py-2 rounded-full text-sm font-semibold">Volatility Comparison</button>
+                        <button id="volumeBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm font-semibold">Trading Volume Comparison</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="memeStockChart"></canvas>
+                    </div>
+                    <p id="chart-context" class="text-center text-sm text-gray-500 mt-4">This chart visually compares the extreme price swings (volatility) of a typical meme stock against the more stable performance of a traditional blue-chip stock.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-center text-amber-800 mb-2">The 'Short Squeeze' Engine</h3>
+                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-6">A "short squeeze" is the financial mechanism that often powers a meme stock's explosive rise. It's a feedback loop that forces investors betting against the stock to buy shares, which ironically drives the price even higher. Click through the steps below to see how it works.</p>
+                    <div class="relative flex flex-col items-center p-6 border border-amber-200 rounded-xl min-h-[200px]">
+                        <div id="step-container">
+                            <!-- Steps will be injected here by JS -->
+                        </div>
+                        <button id="nextStepBtn" class="mt-6 bg-amber-700 hover:bg-amber-800 text-white font-bold py-2 px-6 rounded-full transition-colors">Start Explainer</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="saga" class="content-section">
+                 <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-amber-800">The GameStop Saga: A Timeline</h2>
+                    <p class="mt-2 text-gray-600 max-w-2xl mx-auto">The GameStop (GME) event in January 2021 was the seminal moment that brought meme stocks into the global spotlight. It was a perfect storm of high short interest, retail investor coordination, and social media hype. This timeline highlights the key events of the initial surge.</p>
+                </div>
+                <div class="relative wrap overflow-hidden p-10 h-full">
+                    <div class="border-2-2 absolute border-opacity-20 border-gray-700 h-full border" style="left: 50%"></div>
+                    <!-- Right Timeline -->
+                    <div class="mb-8 flex justify-between items-center w-full right-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-amber-600 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto font-semibold text-lg text-white">1</h1>
+                        </div>
+                        <div class="order-1 bg-amber-100 rounded-lg shadow-xl w-5/12 px-6 py-4">
+                            <h3 class="mb-3 font-bold text-gray-800 text-xl">Aug 2020: The Spark</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-900 text-opacity-100">Keith Gill, known as "Roaring Kitty," posts videos arguing GameStop is undervalued and ripe for a short squeeze, gaining traction on Reddit's r/wallstreetbets.</p>
+                        </div>
+                    </div>
+                    <!-- Left Timeline -->
+                    <div class="mb-8 flex justify-between flex-row-reverse items-center w-full left-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-amber-600 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto text-white font-semibold text-lg">2</h1>
+                        </div>
+                        <div class="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4">
+                            <h3 class="mb-3 font-bold text-gray-800 text-xl">Jan 11-13, 2021: Ignition</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-900 text-opacity-100">Activist investor Ryan Cohen joins GameStop's board, fueling optimism. The stock price begins to climb rapidly as social media hype intensifies.</p>
+                        </div>
+                    </div>
+                    <!-- Right Timeline -->
+                    <div class="mb-8 flex justify-between items-center w-full right-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-amber-600 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto font-semibold text-lg text-white">3</h1>
+                        </div>
+                        <div class="order-1 bg-amber-100 rounded-lg shadow-xl w-5/12 px-6 py-4">
+                            <h3 class="mb-3 font-bold text-gray-800 text-xl">Jan 22-27, 2021: The Squeeze</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-900 text-opacity-100">The short squeeze begins in earnest. The price explodes, rising from ~$40 to nearly $350. Hedge funds like Melvin Capital report massive losses.</p>
+                        </div>
+                    </div>
+                     <!-- Left Timeline -->
+                    <div class="mb-8 flex justify-between flex-row-reverse items-center w-full left-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-amber-600 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto text-white font-semibold text-lg">4</h1>
+                        </div>
+                        <div class="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4">
+                            <h3 class="mb-3 font-bold text-gray-800 text-xl">Jan 28, 2021: Trading Halts</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-900 text-opacity-100">Brokerages like Robinhood restrict buying of GME, citing clearinghouse collateral requirements. This sparks outrage and accusations of market manipulation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="risk" class="content-section">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-amber-800">High Stakes: The Risk & Reward</h2>
+                    <p class="mt-2 text-gray-600 max-w-2xl mx-auto">The allure of meme stocks is the potential for massive, rapid gains. However, the risks are equally extreme. For every success story, there are many who lose significantly. This section outlines the dual nature of speculating on these volatile assets.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-green-50 p-6 rounded-2xl border border-green-200">
+                        <h3 class="text-2xl font-bold text-green-800 mb-4 flex items-center">
+                            <span class="text-3xl mr-3">🚀</span> The Allure (Potential Rewards)
+                        </h3>
+                        <ul class="space-y-3 text-green-900">
+                            <li class="flex items-start"><span class="font-bold mr-2 text-lg">✓</span><div><strong>Rapid, High Returns:</strong> The main draw is the chance for exponential profit in a very short time.</div></li>
+                            <li class="flex items-start"><span class="font-bold mr-2 text-lg">✓</span><div><strong>"David vs. Goliath" Narrative:</strong> A sense of empowerment from challenging large financial institutions.</div></li>
+                            <li class="flex items-start"><span class="font-bold mr-2 text-lg">✓</span><div><strong>Community & Entertainment:</strong> The social aspect and thrill can be a powerful motivator, similar to gambling.</div></li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 p-6 rounded-2xl border border-red-200">
+                        <h3 class="text-2xl font-bold text-red-800 mb-4 flex items-center">
+                             <span class="text-3xl mr-3">💣</span> The Reality (Significant Risks)
+                        </h3>
+                        <ul class="space-y-3 text-red-900">
+                            <li class="flex items-start"><span class="font-bold mr-2 text-lg">✗</span><div><strong>Extreme Volatility:</strong> Prices can plummet as quickly as they rise, with no warning.</div></li>
+                            <li class="flex items-start"><span class="font-bold mr-2 text-lg">✗</span><div><strong>Substantial Losses:</strong> The vast majority of participants lose money, especially those who buy in late.</div></li>
+                            <li class="flex items-start"><span class="font-bold mr-2 text-lg">✗</span><div><strong>Liquidity Risk:</strong> When the hype dies, you may be unable to sell your shares, getting "stuck holding the bag."</div></li>
+                             <li class="flex items-start"><span class="font-bold mr-2 text-lg">✗</span><div><strong>Manipulation:</strong> The hype-driven nature makes these stocks prime targets for "pump-and-dump" schemes.</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="impact" class="content-section">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-amber-800">Market Impact & Regulatory Response</h2>
+                    <p class="mt-2 text-gray-600 max-w-2xl mx-auto">The meme stock phenomenon wasn't just a story about individual traders; it sent shockwaves through the entire financial system. It exposed vulnerabilities, cost institutional investors billions, and forced regulators to take a closer look at the modern market structure.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold mb-3 text-amber-900">Impact on Hedge Funds</h3>
+                        <p class="text-gray-700">The GameStop squeeze inflicted massive losses on hedge funds that were short-selling the stock. Melvin Capital famously lost over 50% of its value in January 2021 alone and eventually shut down. This demonstrated the collective power of retail investors and forced many institutional players to rethink their risk management strategies for highly-shorted stocks.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold mb-3 text-amber-900">Market Stability & Liquidity</h3>
+                        <p class="text-gray-700">The extreme volatility caused a liquidity crisis for some brokers. Clearinghouses, which process trades, demanded billions in extra collateral to cover the risk. This led to the controversial trading restrictions, revealing how fragile the "plumbing" of the market could be under stress and highlighting the need for a faster trade settlement system.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold mb-3 text-amber-900">Regulatory Scrutiny</h3>
+                        <p class="text-gray-700">The SEC and Congress launched investigations into the event. While they found no evidence of collusion to halt trading, the scrutiny has led to serious discussions about market structure reforms. Key topics include the practice of "payment for order flow" (PFOF), the gamification of trading apps, and modernizing the trade settlement cycle from two days (T+2) to one (T+1).</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold mb-3 text-amber-900">Corporate Governance</h3>
+                        <p class="text-gray-700">Some struggling companies, like AMC and GameStop, capitalized on their inflated stock prices by selling new shares to raise billions in cash, giving them a crucial financial lifeline. However, despite hopes that the influx of retail owners would "democratize" corporate governance, studies show these new shareholders have not been active in voting or pushing for corporate changes.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            let memeStockChart;
+
+            function setActiveLink(targetId) {
+                navLinks.forEach(link => {
+                    if (link.dataset.target === targetId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            function showContent(targetId) {
+                contentSections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    const targetId = link.dataset.target;
+                    setActiveLink(targetId);
+                    showContent(targetId);
+                });
+            });
+
+            const chartData = {
+                volatility: {
+                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                    datasets: [{
+                        label: 'Meme Stock Price',
+                        data: [10, 80, 65, 150, 120, 40, 55],
+                        borderColor: '#D97706',
+                        backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                    }, {
+                        label: 'Traditional Stock Price',
+                        data: [100, 101, 100.5, 102, 101.8, 103, 102.5],
+                        borderColor: '#6B7280',
+                        backgroundColor: 'rgba(107, 114, 128, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                    }]
+                },
+                volume: {
+                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                    datasets: [{
+                        label: 'Meme Stock Volume (Millions)',
+                        data: [5, 150, 120, 250, 200, 80, 95],
+                        backgroundColor: '#F59E0B',
+                    }, {
+                        label: 'Traditional Stock Volume (Millions)',
+                        data: [15, 16, 15.5, 17, 16, 18, 17.5],
+                        backgroundColor: '#9CA3AF',
+                    }]
+                }
+            };
+
+            const chartContext = document.getElementById('chart-context');
+            const volatilityBtn = document.getElementById('volatilityBtn');
+            const volumeBtn = document.getElementById('volumeBtn');
+
+            function createChart(type) {
+                const ctx = document.getElementById('memeStockChart').getContext('2d');
+                if (memeStockChart) {
+                    memeStockChart.destroy();
+                }
+
+                if (type === 'volatility') {
+                    memeStockChart = new Chart(ctx, {
+                        type: 'line',
+                        data: chartData.volatility,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { y: { beginAtZero: false, ticks: { callback: value => '$' + value } } },
+                            plugins: { legend: { position: 'top' }, tooltip: { mode: 'index', intersect: false } }
+                        }
+                    });
+                    chartContext.textContent = "This chart visually compares the extreme price swings (volatility) of a typical meme stock against the more stable performance of a traditional blue-chip stock.";
+                    volatilityBtn.classList.replace('bg-gray-200', 'bg-amber-600');
+                    volatilityBtn.classList.replace('text-gray-700', 'text-white');
+                    volumeBtn.classList.replace('bg-amber-600', 'bg-gray-200');
+                    volumeBtn.classList.replace('text-white', 'text-gray-700');
+                } else {
+                    memeStockChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: chartData.volume,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { y: { beginAtZero: true, ticks: { callback: value => value + 'M' } } },
+                            plugins: { legend: { position: 'top' }, tooltip: { mode: 'index', intersect: false } }
+                        }
+                    });
+                    chartContext.textContent = "This chart shows the massive, unpredictable spikes in trading volume for a meme stock compared to the consistent volume of a traditional stock.";
+                    volumeBtn.classList.replace('bg-gray-200', 'bg-amber-600');
+                    volumeBtn.classList.replace('text-gray-700', 'text-white');
+                    volatilityBtn.classList.replace('bg-amber-600', 'bg-gray-200');
+                    volatilityBtn.classList.replace('text-white', 'text-gray-700');
+                }
+            }
+
+            volatilityBtn.addEventListener('click', () => createChart('volatility'));
+            volumeBtn.addEventListener('click', () => createChart('volume'));
+            
+            createChart('volatility');
+
+            const shortSqueezeSteps = [
+                {
+                    title: "Step 1: The Short",
+                    text: "Hedge funds bet against a struggling company by 'short selling' its stock. They borrow shares and sell them, hoping to buy them back later at a lower price and pocket the difference."
+                },
+                {
+                    title: "Step 2: The Catalyst",
+                    text: "Retail investors on social media spot the high short interest. They see an opportunity and begin buying the stock in a coordinated effort, driving the price up."
+                },
+                {
+                    title: "Step 3: The Squeeze",
+                    text: "As the price rises, short sellers start losing money. To cut their losses, they are forced to buy back the shares they borrowed. This new wave of buying creates a huge surge in demand."
+                },
+                {
+                    title: "Step 4: The Feedback Loop",
+                    text: "The forced buying from short sellers pushes the price even higher, causing a frantic feedback loop. This price explosion is the 'short squeeze', which continues until the short sellers have closed their positions."
+                }
+            ];
+            let currentStep = -1;
+            const stepContainer = document.getElementById('step-container');
+            const nextStepBtn = document.getElementById('nextStepBtn');
+
+            function showNextStep() {
+                currentStep++;
+                if (currentStep >= shortSqueezeSteps.length) {
+                    currentStep = 0;
+                }
+
+                if (currentStep === 0) {
+                     nextStepBtn.textContent = "Next Step";
+                }
+
+                const step = shortSqueezeSteps[currentStep];
+                const existingStep = stepContainer.querySelector('.step-explainer');
+                if (existingStep) {
+                    existingStep.style.opacity = '0';
+                    existingStep.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        stepContainer.innerHTML = `
+                            <div class="step-explainer text-center" style="opacity: 0; transform: translateY(20px);">
+                                <h4 class="text-xl font-bold text-amber-900">${step.title}</h4>
+                                <p class="text-gray-600 mt-2">${step.text}</p>
+                            </div>
+                        `;
+                        setTimeout(() => {
+                            const newStep = stepContainer.querySelector('.step-explainer');
+                            newStep.style.opacity = '1';
+                            newStep.style.transform = 'translateY(0)';
+                        }, 50);
+                    }, 500);
+                } else {
+                     stepContainer.innerHTML = `
+                        <div class="step-explainer text-center" style="opacity: 0; transform: translateY(20px);">
+                            <h4 class="text-xl font-bold text-amber-900">${step.title}</h4>
+                            <p class="text-gray-600 mt-2">${step.text}</p>
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        const newStep = stepContainer.querySelector('.step-explainer');
+                        newStep.style.opacity = '1';
+                        newStep.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            }
+
+            nextStepBtn.addEventListener('click', showNextStep);
+        });
+    </script>
+</body>
+</html>
